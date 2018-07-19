@@ -1,10 +1,22 @@
 setwd("D:/victorstat/MAJORS/EDA")
-data_full <- read.csv("household_power_consumption.txt", header=T, sep=';', na.strings="?", 
-                      nrows=2075259, check.names=F, stringsAsFactors=F, comment.char="", quote='\"')
-data1 <- subset(data_full, Date %in% c("1/2/2007","2/2/2007"))
-data1$Date <- as.Date(data1$Date, format="%d/%m/%Y")
-hist(data1$Global_active_power, main="Global Active Power", 
-     xlab="Global Active Power (kilowatts)", ylab="Frequency", col="Red")
+rm(list = ls())
+data <- read.table("household_power_consumption.txt", header = T, 
+                   sep = ";", na.strings = "?")
+# convert the date variable to Date class
+data$Date <- as.Date(data$Date, format = "%d/%m/%Y")
 
-dev.copy(png, file="plot1.png",height=480,width=480)
+# Subset the data
+data <- subset(data, subset = (Date >= "2007-02-01" & Date <= "2007-02-02"))
+
+# Convert dates and times
+data$datetime <- strptime(paste(data$Date, data$Time), "%Y-%m-%d %H:%M:%S")
+
+# Plot 1
+attach(data)
+hist(Global_active_power, main = "Global Active Power", 
+     xlab = "Global Active Power (kilowatts)", col = "Red")
+
+# Save file
+dev.copy(png, file = "plot1.png", height = 480, width = 480)
 dev.off()
+detach(data)

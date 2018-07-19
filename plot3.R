@@ -1,20 +1,27 @@
 setwd("D:/victorstat/MAJORS/EDA")
-data_full <- read.csv("household_power_consumption.txt", header=T, sep=';', na.strings="?", 
-                      nrows=2075259, check.names=F, stringsAsFactors=F, comment.char="", quote='\"')
-data1 <- subset(data_full, Date %in% c("1/2/2007","2/2/2007"))
-data1$Date <- as.Date(data1$Date, format="%d/%m/%Y")
-datetime <- paste(as.Date(data1$Date), data1$Time)
-data1$Datetime <- as.POSIXct(datetime)
+rm(list = ls())
+data <- read.table("household_power_consumption.txt", header = T, 
+                   sep = ";", na.strings = "?")
+# convert the date variable to Date class
+data$Date <- as.Date(data$Date, format = "%d/%m/%Y")
 
-with(data1, {
-  plot(Sub_metering_1~Datetime, type="l",
-       ylab="Energy sub metering", xlab="")
-  lines(Sub_metering_2~Datetime,col='Red')
-  lines(Sub_metering_3~Datetime,col='Blue')
-})
-legend("topright", col=c("black", "red", "blue"), lty=1, lwd=2, 
-       legend=c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"),cex=0.6)
+# Subset the data
+data <- subset(data, subset = (Date >= "2007-02-01" & Date <= "2007-02-02"))
 
-## Saving to file
-dev.copy(png, file="plot3.png",height=480,width=480)
+# Convert dates and times
+data$datetime <- strptime(paste(data$Date, data$Time), "%Y-%m-%d %H:%M:%S")
+
+# Plot 3
+data$datetime <- as.POSIXct(data$datetime)
+
+attach(data)
+plot(Sub_metering_1 ~ datetime, type = "l", 
+     ylab = "Energy sub metering", xlab = "")
+lines(Sub_metering_2 ~ datetime, col = "Red")
+lines(Sub_metering_3 ~ datetime, col = "Blue")
+legend("topright", lty = 1, col = c("black", "red", "blue"), 
+       legend = c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
+
+dev.copy(png, file = "plot3.png", height = 480, width = 480)
 dev.off()
+detach(data)
